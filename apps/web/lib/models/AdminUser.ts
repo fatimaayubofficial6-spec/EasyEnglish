@@ -3,11 +3,21 @@ import { IAdminUser, AdminRole } from "@/types/models";
 
 const AdminUserSchema = new Schema<IAdminUser>(
   {
-    userId: {
+    email: {
       type: String,
       required: true,
       unique: true,
-      ref: "User",
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
+    },
+    hashedPassword: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      trim: true,
     },
     role: {
       type: String,
@@ -31,7 +41,6 @@ const AdminUserSchema = new Schema<IAdminUser>(
     },
     createdBy: {
       type: String,
-      ref: "User",
     },
     isActive: {
       type: Boolean,
@@ -44,7 +53,7 @@ const AdminUserSchema = new Schema<IAdminUser>(
   }
 );
 
-// Indexes for query performance (userId already indexed via unique constraint)
+// Indexes for query performance (email already indexed via unique constraint)
 AdminUserSchema.index({ role: 1, isActive: 1 });
 AdminUserSchema.index({ createdAt: -1 });
 
