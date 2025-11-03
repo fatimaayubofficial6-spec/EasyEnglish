@@ -327,27 +327,114 @@ The application provides helper functions in `lib/db/helpers.ts`:
 - `createAdminUser()`, `updateAdminUser()`, `deactivateAdminUser()`
 - `getAllAdmins()`
 
-## Admin Portal
+## PDF Textbook Generation
 
-The application includes a comprehensive admin portal for managing content and monitoring platform metrics. See [ADMIN_PORTAL.md](./ADMIN_PORTAL.md) for detailed documentation.
+The application automatically generates personalized PDF textbooks for users, containing all their completed lessons with feedback, corrections, and vocabulary.
 
-### Quick Start
+### How It Works
 
-1. Create an admin user:
+1. **Automatic Generation**: After each exercise submission, a background job generates a new lesson page
+2. **PDF Merging**: New lessons are merged with existing PDF using `pdf-lib`
+3. **Cloud Storage**: PDFs are stored in AWS S3 with private ACL
+4. **Secure Downloads**: Users get signed URLs valid for 1 hour
+
+### Required Dependencies
+
+The PDF pipeline requires:
+- **Puppeteer**: Headless Chrome for HTML-to-PDF conversion
+- **pdf-lib**: PDF manipulation and merging
+- **AWS SDK**: S3 storage and signed URL generation
+
+#### Installing Chromium for Puppeteer
+
+Puppeteer downloads Chromium automatically during `npm install`. On some systems (especially Linux), you may need additional dependencies:
+
 ```bash
-npm run admin:create
+# Ubuntu/Debian
+sudo apt-get install -y \
+  ca-certificates \
+  fonts-liberation \
+  libappindicator3-1 \
+  libasound2 \
+  libatk-bridge2.0-0 \
+  libatk1.0-0 \
+  libcups2 \
+  libdbus-1-3 \
+  libgdk-pixbuf2.0-0 \
+  libnspr4 \
+  libnss3 \
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  xdg-utils
+
+# Alpine Linux (for Docker)
+apk add --no-cache \
+  chromium \
+  nss \
+  freetype \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont
 ```
 
-2. Access the admin portal at `/admin/login`
+For serverless environments (Vercel, AWS Lambda), use `@sparticuz/chromium` or deploy a custom Docker image with Chromium.
 
-3. Manage paragraphs, view subscribers, and monitor platform metrics
+### Setting Up AWS S3
 
-### Key Features
+1. **Create an S3 Bucket**:
+   ```bash
+   # Via AWS CLI
+   aws s3api create-bucket --bucket easyenglish-pdfs --region us-east-1
+   ```
 
-- Credentials-based authentication (separate from user auth)
-- Dashboard with key metrics (subscribers, MRR, completions)
-- Full paragraph CRUD with search and filters
-- Subscriber management and activity tracking
+2. **Create IAM User with S3 Permissions**:
+   - Go to [AWS IAM Console](https://console.aws.amazon.com/iam/)
+   - Create a new user with programmatic access
+   - Attach policy with `s3:PutObject` and `s3:GetObject` permissions
+   - Save the Access Key ID and Secret Access Key
+
+3. **Configure Environment Variables**:
+   ```env
+   AWS_REGION=us-east-1
+   AWS_ACCESS_KEY_ID=your-access-key-id
+   AWS_SECRET_ACCESS_KEY=your-secret-access-key
+   AWS_S3_BUCKET=easyenglish-pdfs
+   ```
+
+### Alternative: Cloudflare R2
+
+Cloudflare R2 is S3-compatible and more cost-effective:
+
+1. Create an R2 bucket at [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. Generate API tokens with read/write permissions
+3. Use the same environment variables (R2 is S3-compatible)
+
+### PDF Template
+
+The PDF template is located at `templates/pdfLesson.tsx` and generates styled HTML for each lesson. The template includes:
+- Lesson metadata (number, date, score, difficulty)
+- Original text and user translation
+- Side-by-side comparison with corrected version
+- Grammar mistakes with explanations
+- Key vocabulary with definitions and examples
+- Grammar tenses used
+- Personalized feedback (strengths, improvements, suggestions)
+
+To customize the template, edit the HTML and inline styles in `templates/pdfLesson.tsx`.
+
+### API Routes
+
+- `POST /api/pdf/generate` - Trigger PDF generation for a user/attempt
+- `GET /api/pdf/download` - Generate signed download URL (requires auth)
+
+### Graceful Degradation
+
+If AWS credentials are not configured, the application will:
+- Log warnings but continue to function
+- Skip PDF generation without failing exercise submissions
+- Show appropriate messages on the `/my-pdf` page
 
 ## Environment Variables
 

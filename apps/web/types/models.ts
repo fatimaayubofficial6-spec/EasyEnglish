@@ -66,6 +66,9 @@ export interface IUser extends Document {
   nextBillingDate?: Date;
   onboardingCompleted: boolean;
   lastExerciseDate?: Date;
+  pdfUrl?: string;
+  pdfLessonsCount?: number;
+  pdfLastUpdated?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -131,6 +134,7 @@ export interface IExerciseAttempt extends Document {
   };
   timeSpentSeconds?: number;
   completedAt: Date;
+  addedToPdf?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
