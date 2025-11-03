@@ -142,9 +142,7 @@ export interface IExerciseAttempt extends Document {
 // AdminUser Interface
 export interface IAdminUser extends Document {
   _id: string;
-  email: string;
-  hashedPassword: string;
-  name?: string;
+  userId: string;
   role: AdminRole;
   permissions: string[];
   notes?: string;
