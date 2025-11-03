@@ -327,6 +327,28 @@ The application provides helper functions in `lib/db/helpers.ts`:
 - `createAdminUser()`, `updateAdminUser()`, `deactivateAdminUser()`
 - `getAllAdmins()`
 
+## Admin Portal
+
+The application includes a comprehensive admin portal for managing content and monitoring platform metrics. See [ADMIN_PORTAL.md](./ADMIN_PORTAL.md) for detailed documentation.
+
+### Quick Start
+
+1. Create an admin user:
+```bash
+npm run admin:create
+```
+
+2. Access the admin portal at `/admin/login`
+
+3. Manage paragraphs, view subscribers, and monitor platform metrics
+
+### Key Features
+
+- Credentials-based authentication (separate from user auth)
+- Dashboard with key metrics (subscribers, MRR, completions)
+- Full paragraph CRUD with search and filters
+- Subscriber management and activity tracking
+
 ## Environment Variables
 
 See `.env.example` for a complete list of required environment variables.

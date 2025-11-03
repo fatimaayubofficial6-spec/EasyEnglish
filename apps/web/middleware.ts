@@ -1,11 +1,21 @@
 import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import type { NextRequestWithAuth } from "next-auth/middleware";
+import { adminMiddleware } from "@/lib/middleware/admin";
 
-export default withAuth(
-  async function middleware(req: NextRequestWithAuth) {
-    const pathname = req.nextUrl.pathname;
-    const token = req.nextauth.token;
+export default async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+
+  // Handle admin routes with separate middleware
+  if (pathname.startsWith("/admin")) {
+    return adminMiddleware(req);
+  }
+
+  // Handle user routes with NextAuth
+  return withAuth(
+    async function middleware(req: NextRequestWithAuth) {
+      const pathname = req.nextUrl.pathname;
+      const token = req.nextauth.token;
 
     if (!token) {
       return NextResponse.next();
@@ -34,35 +44,37 @@ export default withAuth(
       }
     }
 
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ req, token }) => {
-        const pathname = req.nextUrl.pathname;
+      return NextResponse.next();
+    },
+    {
+      callbacks: {
+        authorized: ({ req, token }) => {
+          const pathname = req.nextUrl.pathname;
 
-        if (
-          pathname.startsWith("/dashboard") ||
-          pathname.startsWith("/exercise") ||
-          pathname.startsWith("/feedback") ||
-          pathname.startsWith("/my-pdf") ||
-          pathname.startsWith("/subscribe") ||
-          pathname.startsWith("/onboarding")
-        ) {
-          return !!token;
-        }
+          if (
+            pathname.startsWith("/dashboard") ||
+            pathname.startsWith("/exercise") ||
+            pathname.startsWith("/feedback") ||
+            pathname.startsWith("/my-pdf") ||
+            pathname.startsWith("/subscribe") ||
+            pathname.startsWith("/onboarding")
+          ) {
+            return !!token;
+          }
 
-        return true;
+          return true;
+        },
       },
-    },
-    pages: {
-      signIn: "/auth/signin",
-    },
-  }
-);
+      pages: {
+        signIn: "/auth/signin",
+      },
+    }
+  )(req);
+}
 
 export const config = {
   matcher: [
+    "/admin/:path*",
     "/dashboard/:path*",
     "/exercise/:path*",
     "/feedback/:path*",
