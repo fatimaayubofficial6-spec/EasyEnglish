@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
 
 const navLinks = [
   { href: "#how-it-works", label: "How It Works" },
@@ -14,6 +15,12 @@ const navLinks = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <>
@@ -46,12 +53,28 @@ export function Header() {
 
           <div className="flex items-center gap-4">
             <div className="hidden items-center gap-4 md:flex">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/auth/signup">Get Started</Link>
-              </Button>
+              {isLoading ? (
+                <div className="h-9 w-32 animate-pulse rounded-md bg-muted" />
+              ) : session ? (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/auth/signin">Sign In</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href="/auth/signin">Get Started</Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             <Button
@@ -89,16 +112,42 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="mt-4 space-y-2 border-t border-border/40 pt-4">
-                  <Button variant="ghost" size="sm" className="w-full" asChild>
-                    <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
-                      Sign In
-                    </Link>
-                  </Button>
-                  <Button size="sm" className="w-full" asChild>
-                    <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
-                      Get Started
-                    </Link>
-                  </Button>
+                  {isLoading ? (
+                    <div className="h-9 w-full animate-pulse rounded-md bg-muted" />
+                  ) : session ? (
+                    <>
+                      <Button variant="ghost" size="sm" className="w-full" asChild>
+                        <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                          Dashboard
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleSignOut();
+                        }}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" size="sm" className="w-full" asChild>
+                        <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button size="sm" className="w-full" asChild>
+                        <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)}>
+                          Get Started
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </m.nav>
