@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { Loader2, Settings } from "lucide-react";
 
-export function ManageSubscriptionButton() {
+interface ManageSubscriptionButtonProps extends ButtonProps {
+  children?: React.ReactNode;
+}
+
+export function ManageSubscriptionButton({ 
+  children, 
+  className,
+  variant = "outline",
+  ...props 
+}: ManageSubscriptionButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -39,8 +48,9 @@ export function ManageSubscriptionButton() {
     <Button
       onClick={handleManageSubscription}
       disabled={isLoading}
-      variant="outline"
-      className="w-full"
+      variant={variant}
+      className={className || "w-full"}
+      {...props}
     >
       {isLoading ? (
         <>
@@ -48,10 +58,12 @@ export function ManageSubscriptionButton() {
           Loading...
         </>
       ) : (
-        <>
-          <Settings className="mr-2 h-4 w-4" />
-          Manage Subscription
-        </>
+        children || (
+          <>
+            <Settings className="mr-2 h-4 w-4" />
+            Manage Subscription
+          </>
+        )
       )}
     </Button>
   );
