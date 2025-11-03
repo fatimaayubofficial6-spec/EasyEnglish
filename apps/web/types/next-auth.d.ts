@@ -5,6 +5,9 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      subscriptionStatus: string;
+      subscriptionTier: string;
+      onboardingCompleted: boolean;
     } & DefaultSession["user"];
   }
 
@@ -17,5 +20,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     isNewUser?: boolean;
+    subscriptionStatus?: string;
+    subscriptionTier?: string;
+    onboardingCompleted?: boolean;
   }
 }

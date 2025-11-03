@@ -60,6 +60,9 @@ export interface IUser extends Document {
   subscriptionStartDate?: Date;
   subscriptionEndDate?: Date;
   stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  nextBillingDate?: Date;
   onboardingCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
