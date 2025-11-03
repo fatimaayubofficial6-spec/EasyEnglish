@@ -1,10 +1,11 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import type { Adapter } from "next-auth/adapters";
 import clientPromise from "@/lib/db/mongodb";
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise) as any,
+  adapter: MongoDBAdapter(clientPromise) as Adapter,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user, account, profile, trigger }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         if (account) {
@@ -34,7 +35,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn() {
       return true;
     },
     async redirect({ url, baseUrl }) {
@@ -44,7 +45,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn({ user, isNewUser }) {
       if (isNewUser) {
         console.log("New user signed up:", user.email);
       }
