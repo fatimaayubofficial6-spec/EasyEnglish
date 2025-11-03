@@ -1,30 +1,60 @@
-import { cn } from "@/lib/utils";
+import { AppShell, MainContent } from "@/components/layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between text-center">
-        <h1 className={cn("mb-8 text-6xl font-bold")}>
-          Welcome to <span className="text-blue-500">EasyEnglish</span>
-        </h1>
-        <p className="text-xl text-gray-400">Your journey to mastering English starts here.</p>
-        <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <button
-            className={cn(
-              "rounded-lg bg-blue-600 px-8 py-3 text-white transition-colors hover:bg-blue-700"
-            )}
-          >
-            Get Started
-          </button>
-          <button
-            className={cn(
-              "rounded-lg border border-gray-700 px-8 py-3 transition-colors hover:bg-gray-800"
-            )}
-          >
-            Learn More
-          </button>
+    <AppShell>
+      <MainContent className="flex items-center justify-center">
+        <div className="w-full max-w-5xl space-y-16 py-12">
+          <div className="text-center">
+            <Badge className="mb-4" variant="outline">
+              ✨ Welcome to EasyEnglish
+            </Badge>
+            <h1 className="mb-6">
+              Learn English the <span className="gradient-text">Easy Way</span>
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              Your journey to mastering English starts here. Experience personalized lessons powered
+              by AI and interactive practice sessions.
+            </p>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <Button size="lg">Get Started</Button>
+              <Button size="lg" variant="outline">
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="glass-hover">
+              <CardHeader>
+                <CardTitle>📚 Interactive Lessons</CardTitle>
+                <CardDescription>
+                  Engage with dynamic content tailored to your learning level
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="glass-hover">
+              <CardHeader>
+                <CardTitle>🤖 AI-Powered</CardTitle>
+                <CardDescription>
+                  Get personalized feedback and recommendations from our AI assistant
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="glass-hover">
+              <CardHeader>
+                <CardTitle>📈 Track Progress</CardTitle>
+                <CardDescription>
+                  Monitor your improvement with detailed analytics and insights
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
-      </div>
-    </main>
+      </MainContent>
+    </AppShell>
   );
 }
