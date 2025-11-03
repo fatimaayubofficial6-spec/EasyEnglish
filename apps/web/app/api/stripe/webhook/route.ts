@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/stripe";
-import { connectDB } from "@/lib/db/mongoose";
+import connectDB from "@/lib/db/mongoose";
 import User from "@/lib/models/User";
 import { SubscriptionStatus, SubscriptionTier } from "@/types/models";
 
@@ -109,8 +109,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   user.subscriptionStatus = SubscriptionStatus.ACTIVE;
   user.subscriptionStartDate = new Date();
 
-  if (subscriptionId) {
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  if (subscriptionId && stripe) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subscription = (await stripe.subscriptions.retrieve(subscriptionId)) as any;
     user.stripePriceId = subscription.items.data[0]?.price.id;
     user.nextBillingDate = new Date(subscription.current_period_end * 1000);
   }
@@ -123,9 +124,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   const customerId = invoice.customer as string;
-  const subscriptionId = invoice.subscription as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subscriptionId = (invoice as any).subscription as string;
 
-  if (!subscriptionId) {
+  if (!subscriptionId || !stripe) {
     return;
   }
 
@@ -136,7 +138,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subscription = (await stripe.subscriptions.retrieve(subscriptionId)) as any;
 
   user.subscriptionStatus = SubscriptionStatus.ACTIVE;
   user.subscriptionTier = SubscriptionTier.PREMIUM;
@@ -172,9 +175,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sub = subscription as any;
   user.subscriptionStatus = SubscriptionStatus.CANCELED;
   user.subscriptionTier = SubscriptionTier.FREE;
-  user.subscriptionEndDate = new Date(subscription.ended_at ? subscription.ended_at * 1000 : Date.now());
+  user.subscriptionEndDate = new Date(sub.ended_at ? sub.ended_at * 1000 : Date.now());
   user.stripeSubscriptionId = undefined;
   user.stripePriceId = undefined;
   user.nextBillingDate = undefined;
@@ -195,18 +200,20 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return;
   }
 
-  if (subscription.status === "active") {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sub = subscription as any;
+  if (sub.status === "active") {
     user.subscriptionStatus = SubscriptionStatus.ACTIVE;
     user.subscriptionTier = SubscriptionTier.PREMIUM;
-    user.nextBillingDate = new Date(subscription.current_period_end * 1000);
-  } else if (subscription.status === "canceled" || subscription.status === "unpaid") {
+    user.nextBillingDate = new Date(sub.current_period_end * 1000);
+  } else if (sub.status === "canceled" || sub.status === "unpaid") {
     user.subscriptionStatus = SubscriptionStatus.CANCELED;
-  } else if (subscription.status === "past_due") {
+  } else if (sub.status === "past_due") {
     // Keep as active but could add a "past_due" status if needed
     console.warn(`Subscription past due for user ${user._id}`);
   }
 
-  user.stripePriceId = subscription.items.data[0]?.price.id;
+  user.stripePriceId = sub.items.data[0]?.price.id;
 
   await user.save();
 

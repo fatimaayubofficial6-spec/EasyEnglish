@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import type { Adapter } from "next-auth/adapters";
 import clientPromise from "@/lib/db/mongodb";
-import { connectDB } from "@/lib/db/mongoose";
+import connectDB from "@/lib/db/mongoose";
 import User from "@/lib/models/User";
 
 export const authOptions: NextAuthOptions = {
@@ -38,6 +38,8 @@ export const authOptions: NextAuthOptions = {
             token.subscriptionStatus = dbUser.subscriptionStatus;
             token.subscriptionTier = dbUser.subscriptionTier;
             token.onboardingCompleted = dbUser.onboardingCompleted;
+            token.nativeLanguage = dbUser.nativeLanguage;
+            token.nativeLanguageName = dbUser.nativeLanguageName;
           }
         } catch (error) {
           console.error("Error fetching user subscription data:", error);
@@ -52,6 +54,8 @@ export const authOptions: NextAuthOptions = {
         session.user.subscriptionStatus = token.subscriptionStatus as string;
         session.user.subscriptionTier = token.subscriptionTier as string;
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
+        session.user.nativeLanguage = token.nativeLanguage as string | undefined;
+        session.user.nativeLanguageName = token.nativeLanguageName as string | undefined;
       }
       return session;
     },

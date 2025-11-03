@@ -53,7 +53,8 @@ export interface IUser extends Document {
   name?: string;
   image?: string;
   googleId?: string;
-  nativeLanguage?: Language;
+  nativeLanguage?: string;
+  nativeLanguageName?: string;
   learningLanguage: Language;
   subscriptionTier: SubscriptionTier;
   subscriptionStatus: SubscriptionStatus;

@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell, MainContent } from "@/components/layout";
-import { connectDB } from "@/lib/db/mongoose";
+import connectDB from "@/lib/db/mongoose";
 import User from "@/lib/models/User";
 import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 
