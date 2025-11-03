@@ -47,6 +47,33 @@ const ExerciseAttemptSchema = new Schema<IExerciseAttempt>(
         type: [String],
         default: [],
       },
+      correctedVersion: {
+        type: String,
+      },
+      grammarMistakes: {
+        type: [
+          {
+            mistake: String,
+            correction: String,
+            explanation: String,
+          },
+        ],
+        default: [],
+      },
+      tenses: {
+        type: [String],
+        default: [],
+      },
+      keyVocabulary: {
+        type: [
+          {
+            word: String,
+            definition: String,
+            example: String,
+          },
+        ],
+        default: [],
+      },
     },
     timeSpentSeconds: {
       type: Number,

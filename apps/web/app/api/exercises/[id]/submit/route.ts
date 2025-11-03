@@ -111,6 +111,10 @@ export async function POST(
           strengths: feedbackResult.feedback.strengths,
           improvements: feedbackResult.feedback.improvements,
           suggestions: feedbackResult.feedback.suggestions,
+          correctedVersion: feedbackResult.feedback.correctedVersion,
+          grammarMistakes: feedbackResult.feedback.grammarMistakes,
+          tenses: feedbackResult.feedback.tenses,
+          keyVocabulary: feedbackResult.feedback.keyVocabulary,
         };
       } else {
         console.error("Feedback generation failed:", feedbackResult.error);
