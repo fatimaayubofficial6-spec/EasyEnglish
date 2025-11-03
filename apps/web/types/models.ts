@@ -116,6 +116,18 @@ export interface IExerciseAttempt extends Document {
     strengths?: string[];
     improvements?: string[];
     suggestions?: string[];
+    correctedVersion?: string;
+    grammarMistakes?: Array<{
+      mistake: string;
+      correction: string;
+      explanation: string;
+    }>;
+    tenses?: string[];
+    keyVocabulary?: Array<{
+      word: string;
+      definition: string;
+      example: string;
+    }>;
   };
   timeSpentSeconds?: number;
   completedAt: Date;

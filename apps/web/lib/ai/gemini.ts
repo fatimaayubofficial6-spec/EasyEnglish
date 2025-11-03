@@ -37,6 +37,18 @@ interface FeedbackResult {
     improvements: string[];
     suggestions: string[];
     overallFeedback: string;
+    correctedVersion?: string;
+    grammarMistakes?: Array<{
+      mistake: string;
+      correction: string;
+      explanation: string;
+    }>;
+    tenses?: string[];
+    keyVocabulary?: Array<{
+      word: string;
+      definition: string;
+      example: string;
+    }>;
   };
   error?: string;
 }
@@ -221,7 +233,23 @@ Please provide detailed feedback in the following JSON format:
   "strengths": [<array of 2-3 specific strengths in the translation>],
   "improvements": [<array of 2-3 specific areas that need improvement>],
   "suggestions": [<array of 2-3 actionable suggestions for better translation>],
-  "overallFeedback": "<brief 2-3 sentence summary of the translation quality>"
+  "overallFeedback": "<brief 2-3 sentence summary of the translation quality>",
+  "correctedVersion": "<the corrected/improved version of the student's translation>",
+  "grammarMistakes": [
+    {
+      "mistake": "<specific mistake from student's text>",
+      "correction": "<corrected version>",
+      "explanation": "<brief explanation of the grammar rule>"
+    }
+  ],
+  "tenses": [<array of key tenses used or needed in the translation, e.g., "Present Simple", "Past Perfect">],
+  "keyVocabulary": [
+    {
+      "word": "<important vocabulary word from the text>",
+      "definition": "<simple definition>",
+      "example": "<example sentence using the word>"
+    }
+  ]
 }
 
 Evaluate based on:
@@ -350,6 +378,18 @@ function parseFeedbackResponse(responseText: string): {
   improvements: string[];
   suggestions: string[];
   overallFeedback: string;
+  correctedVersion?: string;
+  grammarMistakes?: Array<{
+    mistake: string;
+    correction: string;
+    explanation: string;
+  }>;
+  tenses?: string[];
+  keyVocabulary?: Array<{
+    word: string;
+    definition: string;
+    example: string;
+  }>;
 } {
   try {
     // Try to extract JSON from response (in case there's extra text)
@@ -367,6 +407,10 @@ function parseFeedbackResponse(responseText: string): {
       improvements: Array.isArray(parsed.improvements) ? parsed.improvements : [],
       suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
       overallFeedback: parsed.overallFeedback || "Good effort!",
+      correctedVersion: parsed.correctedVersion,
+      grammarMistakes: Array.isArray(parsed.grammarMistakes) ? parsed.grammarMistakes : [],
+      tenses: Array.isArray(parsed.tenses) ? parsed.tenses : [],
+      keyVocabulary: Array.isArray(parsed.keyVocabulary) ? parsed.keyVocabulary : [],
     };
   } catch (error) {
     console.error("Failed to parse feedback response:", error);
