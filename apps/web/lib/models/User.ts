@@ -82,6 +82,17 @@ const UserSchema = new Schema<IUser>(
     lastExerciseDate: {
       type: Date,
     },
+    pdfUrl: {
+      type: String,
+    },
+    pdfLessonsCount: {
+      type: Number,
+      default: 0,
+      min: [0, "PDF lessons count cannot be negative"],
+    },
+    pdfLastUpdated: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

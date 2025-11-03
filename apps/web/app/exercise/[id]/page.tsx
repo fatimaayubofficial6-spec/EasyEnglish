@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ExerciseLayout, ExerciseLoading } from "@/components/exercise";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { DifficultyLevel } from "@/types/models";
 
 interface ExerciseData {
   id: string;
@@ -113,7 +114,7 @@ async function ExerciseContent({ id }: { id: string }) {
       <ExerciseLayout
         exerciseId={exercise.id}
         title={exercise.title}
-        difficulty={exercise.difficulty as any}
+        difficulty={exercise.difficulty as DifficultyLevel}
         topics={exercise.topics}
         estimatedMinutes={exercise.estimatedMinutes}
         content={exercise.content}

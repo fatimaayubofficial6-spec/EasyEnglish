@@ -84,6 +84,10 @@ const ExerciseAttemptSchema = new Schema<IExerciseAttempt>(
       required: true,
       default: Date.now,
     },
+    addedToPdf: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

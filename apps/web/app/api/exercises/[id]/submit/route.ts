@@ -81,10 +81,26 @@ export async function POST(
     // Generate AI feedback
     let score = 0;
     let feedbackText = "";
-    let aiAnalysis = {
-      strengths: [] as string[],
-      improvements: [] as string[],
-      suggestions: [] as string[],
+    let aiAnalysis: {
+      strengths: string[];
+      improvements: string[];
+      suggestions: string[];
+      correctedVersion?: string;
+      grammarMistakes?: Array<{
+        mistake: string;
+        correction: string;
+        explanation: string;
+      }>;
+      tenses?: string[];
+      keyVocabulary?: Array<{
+        word: string;
+        definition: string;
+        example: string;
+      }>;
+    } = {
+      strengths: [],
+      improvements: [],
+      suggestions: [],
     };
 
     if (!isGeminiConfigured()) {
@@ -145,10 +161,12 @@ export async function POST(
     // Update user stats
     await updateUserStats(user.id);
 
-    // TODO: Trigger PDF update job (placeholder for future implementation)
-    // This would enqueue a background job to regenerate user's PDF
-    // For now, we just log it
-    console.log(`PDF update needed for user ${user.id} after exercise completion`);
+    // Trigger PDF generation in the background (non-blocking)
+    // We use fetch with revalidate to trigger async PDF generation
+    triggerPdfGeneration(user.id, attempt._id.toString()).catch((error) => {
+      console.error("Failed to trigger PDF generation:", error);
+      // Don't fail the request if PDF generation fails
+    });
 
     // Return response
     return NextResponse.json({
@@ -189,5 +207,32 @@ async function updateUserStats(userId: string): Promise<void> {
   } catch (error) {
     console.error("Failed to update user stats:", error);
     // Don't throw - this is not critical enough to fail the whole request
+  }
+}
+
+/**
+ * Trigger PDF generation in the background
+ * Uses internal API call to avoid blocking the response
+ */
+async function triggerPdfGeneration(userId: string, attemptId: string): Promise<void> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/pdf/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, attemptId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("PDF generation API returned error:", error);
+    } else {
+      console.log(`PDF generation triggered for user ${userId}`);
+    }
+  } catch (error) {
+    console.error("Failed to call PDF generation API:", error);
+    throw error;
   }
 }
