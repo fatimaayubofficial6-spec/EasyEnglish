@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell, MainContent } from "@/components/layout";
+import { connectDB } from "@/lib/db/mongoose";
+import User from "@/lib/models/User";
+import { ManageSubscriptionButton } from "@/components/ManageSubscriptionButton";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -9,6 +12,9 @@ export default async function DashboardPage() {
   if (!user) {
     redirect("/auth/signin");
   }
+
+  await connectDB();
+  const dbUser = await User.findOne({ email: user.email }).lean();
 
   return (
     <AppShell>
@@ -65,6 +71,40 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground">
                   Progress tracking will be available soon.
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Subscription</CardTitle>
+                <CardDescription>Manage your subscription</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Plan:</span>
+                    <span className="text-sm font-medium capitalize">
+                      {dbUser?.subscriptionTier || "free"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <span className="text-sm font-medium capitalize">
+                      {dbUser?.subscriptionStatus || "active"}
+                    </span>
+                  </div>
+                  {dbUser?.nextBillingDate && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Next billing:</span>
+                      <span className="text-sm font-medium">
+                        {new Date(dbUser.nextBillingDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {dbUser?.stripeCustomerId && (
+                  <ManageSubscriptionButton />
+                )}
               </CardContent>
             </Card>
           </div>

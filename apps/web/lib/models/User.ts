@@ -61,6 +61,17 @@ const UserSchema = new Schema<IUser>(
       unique: true,
       sparse: true,
     },
+    stripeSubscriptionId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    stripePriceId: {
+      type: String,
+    },
+    nextBillingDate: {
+      type: Date,
+    },
     onboardingCompleted: {
       type: Boolean,
       default: false,
