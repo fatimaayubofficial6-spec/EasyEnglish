@@ -18,7 +18,10 @@ const customJestConfig = {
     "!**/__tests__/**",
   ],
   testPathIgnorePatterns: ["/node_modules/", "/.next/", "/__tests__/auth.test.ts"],
-  transformIgnorePatterns: ["/node_modules/", "^.+\\.module\\.(css|sass|scss)$"],
+  transformIgnorePatterns: [
+    "/node_modules/(?!(bson)/)",
+    "^.+\\.module\\.(css|sass|scss)$",
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

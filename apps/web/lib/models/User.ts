@@ -79,6 +79,9 @@ const UserSchema = new Schema<IUser>(
       default: false,
       required: true,
     },
+    lastExerciseDate: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

@@ -65,6 +65,7 @@ export interface IUser extends Document {
   stripePriceId?: string;
   nextBillingDate?: Date;
   onboardingCompleted: boolean;
+  lastExerciseDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
