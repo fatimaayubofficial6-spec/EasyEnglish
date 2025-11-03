@@ -54,6 +54,51 @@ DATABASE_URL=mongodb://localhost:27017/easyenglish
    - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
 5. Copy the Client ID and Client Secret to your `.env.local` file
 
+### Setting Up MongoDB
+
+The application uses MongoDB with Mongoose for data persistence. You have two options:
+
+#### Option 1: Local MongoDB (via Docker)
+
+```bash
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+Then set in `.env.local`:
+```env
+DATABASE_URL=mongodb://localhost:27017/easyenglish
+```
+
+#### Option 2: MongoDB Atlas (Recommended)
+
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register)
+2. Create a new cluster (free tier available)
+3. Add your IP address to the IP Access List
+4. Create a database user with read/write permissions
+5. Get your connection string and add to `.env.local`:
+
+```env
+DATABASE_URL=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/easyenglish?retryWrites=true&w=majority
+```
+
+### Seeding the Database
+
+After setting up MongoDB, seed it with sample data:
+
+```bash
+npm run db:seed
+```
+
+This will create:
+- Sample paragraphs for exercises (various difficulty levels)
+- Example content in English and Spanish
+
+**Note**: To create an admin user, you need to:
+1. Sign in to the application first
+2. Find your user ID in the MongoDB `users` collection
+3. Update the `sampleAdminUserId` in `scripts/seed.ts`
+4. Run `npm run db:seed` again
+
 ### Running the Development Server
 
 ```bash
@@ -185,6 +230,10 @@ apps/web/
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
+- `npm run test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run db:seed` - Seed database with sample data
 
 ## Testing
 
@@ -199,14 +248,84 @@ Run the application in development mode and test the authentication flow:
 
 ## Database
 
-The application uses MongoDB with the NextAuth MongoDB adapter for persistent session storage. If `DATABASE_URL` is not provided, the application will fall back to JWT sessions without database persistence.
+The application uses MongoDB with Mongoose for data persistence and schema validation.
 
 ### MongoDB Collections
 
-NextAuth automatically creates the following collections:
+The application uses the following collections:
+
+**Authentication (managed by NextAuth MongoDB adapter):**
 - `users` - User profiles
 - `accounts` - OAuth account information
 - `sessions` - User sessions (if using database sessions)
+
+**Application Data (managed by Mongoose models):**
+- `users` - Extended user data with subscription info, language preferences
+- `paragraphs` - Exercise content with difficulty levels and metadata
+- `translationcaches` - Cached translations to reduce API calls
+- `exerciseattempts` - User exercise submissions and scores
+- `adminusers` - Admin roles and permissions
+
+### Data Models
+
+#### User Model
+- Email (unique, required)
+- Google ID (unique, sparse)
+- Native and learning languages
+- Subscription tier and status
+- Onboarding completion status
+
+#### Paragraph Model
+- Title and content
+- Difficulty level (beginner, intermediate, advanced)
+- Language and topics
+- Auto-calculated word count
+- Active/inactive status
+
+#### TranslationCache Model
+- Source text and translation
+- Source and target languages
+- Provider (e.g., OpenAI)
+- Expiration date (30-day TTL)
+- Compound unique index on (text, sourceLang, targetLang)
+
+#### ExerciseAttempt Model
+- User and paragraph references
+- Exercise type (translation, gap_fill, rewrite, comprehension)
+- User answer and correct answer
+- Score (0-100)
+- AI-generated feedback and analysis
+- Time spent tracking
+
+#### AdminUser Model
+- User reference
+- Role (super_admin, admin, moderator)
+- Permissions array
+- Active status
+
+### Helper Functions
+
+The application provides helper functions in `lib/db/helpers.ts`:
+
+**User Operations:**
+- `getUserById()`, `getUserByEmail()`, `getUserByGoogleId()`
+- `updateUserSubscription()`, `updateUserOnboarding()`
+
+**Paragraph Operations:**
+- `getActiveParagraphs()`, `getParagraphById()`
+- `createParagraph()`, `updateParagraph()`, `deactivateParagraph()`
+
+**Translation Cache:**
+- `getCachedTranslation()`, `setCachedTranslation()`
+
+**Exercise Attempts:**
+- `createExerciseAttempt()`, `getUserExerciseAttempts()`
+- `getUserExerciseStats()`
+
+**Admin Operations:**
+- `isUserAdmin()`, `getAdminUser()`
+- `createAdminUser()`, `updateAdminUser()`, `deactivateAdminUser()`
+- `getAllAdmins()`
 
 ## Environment Variables
 
