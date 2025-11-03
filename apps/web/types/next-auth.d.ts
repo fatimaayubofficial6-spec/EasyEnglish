@@ -8,6 +8,8 @@ declare module "next-auth" {
       subscriptionStatus: string;
       subscriptionTier: string;
       onboardingCompleted: boolean;
+      nativeLanguage?: string;
+      nativeLanguageName?: string;
     } & DefaultSession["user"];
   }
 
@@ -23,5 +25,7 @@ declare module "next-auth/jwt" {
     subscriptionStatus?: string;
     subscriptionTier?: string;
     onboardingCompleted?: boolean;
+    nativeLanguage?: string;
+    nativeLanguageName?: string;
   }
 }

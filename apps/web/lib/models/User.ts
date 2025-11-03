@@ -30,7 +30,9 @@ const UserSchema = new Schema<IUser>(
     },
     nativeLanguage: {
       type: String,
-      enum: Object.values(Language),
+    },
+    nativeLanguageName: {
+      type: String,
     },
     learningLanguage: {
       type: String,
